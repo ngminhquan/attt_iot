@@ -114,23 +114,6 @@ class Salsa20():
         return bytes([x ^ y for x, y in zip(a, b)])
     
     #row and column round
-    def qr(self, a, b, c, d):
-        a = a & 0xFFFFFFFF
-        b = b & 0xFFFFFFFF
-        c = c & 0xFFFFFFFF
-        d = d & 0xFFFFFFFF
-        
-        b ^= (a + d) << 7
-        c ^= (b + a) << 9
-        d ^= (c + b) << 13
-        a ^= (d + c) << 18
-        
-        a = a & 0xFFFFFFFF
-        b = b & 0xFFFFFFFF
-        c = c & 0xFFFFFFFF
-        d = d & 0xFFFFFFFF
-        
-        return a, b, c, d
     '''
     thuật toán thực tế là thực hiện thông qua quarter round cho hàng và cột
     If x is a 4-word input:
@@ -143,6 +126,16 @@ class Salsa20():
     y3 = x3 XOR ((y2 + y1) <<< 13)
     y0 = x0 XOR ((y3 + y2) <<< 18)
     '''
+    def qr(self, a, b, c, d):
+        b ^= self.ROTL(a+d, 7)
+        c ^= self.ROTL(b+a, 9)
+        d ^= self.ROTL(c+b,13)
+        a ^= self.ROTL(d+c,18)
+        return a, b, c, d
+
+    def ROTL(self, x, y):
+        return (((x) << (y)) & 0xFFFFFFFF) | ((x) >> (32 - (y)))
+    
 
     #row round function
     '''
@@ -216,7 +209,3 @@ cipher = salsa.encrypt(msg)
 print(cipher, len(cipher), len(msg))
 
 
-
-
-
-    
